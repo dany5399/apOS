@@ -1,0 +1,10 @@
+megs: 32
+romimage: file=/usr/share/bochs/BIOS-bochs-latest
+vgaromimage: file=/usr/share/bochs/VGABIOS-lgpl-latest
+floppya: 1_44=dist/kernel.bin, status=inserted
+boot: floppy
+mouse: enabled=0
+cpu: count=1, ips=1000000, reset_on_triple_fault=1
+display_library: x, options="gui_debug"
+log: /dev/null
+magic_break: enabled=1
