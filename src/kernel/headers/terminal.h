@@ -7,9 +7,6 @@
 const static size_t NUM_COLS = 80;
 const static size_t NUM_ROWS = 25;
 
-//terminal theme - i mean it's colors so i guess i can call it a theme?
-uint8_t t_THEME = BLACK << 4 | WHITE; //b01111
-
 enum{
 	BLACK,			//0
 	BLUE,			//1	
@@ -29,13 +26,15 @@ enum{
 	WHITE			//15
 };
 
-void t_color(uint8_t fg, uint8_t bg);
+//terminal theme - i mean it's colors so i guess i can call it a theme?
+static uint8_t t_THEME = BLACK << 4 | WHITE; //b01111
 
+void t_set_theme(uint8_t fg, uint8_t bg);
 void t_print(char* str);
 void t_clear_rows(int lines);
 
 #define t_UP	-1
 #define t_DOWN	 1
-void t_scroll(int direction, int lines);
-
+void t_scroll(int direction, uint8_t lines);
+void t_set_cursor(int row, int col);
 

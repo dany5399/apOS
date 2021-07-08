@@ -6,27 +6,25 @@ struct vbuf_t{
 	uint8_t color;
 };
 
-struct vbuf_t EMPTY_CHAR = (struct vbuf_t) {_char: ' ', color: BLACK}
-
 struct vbuf_t* V_BUF = (struct vbuf_t*) 0xb8000; //video memory location
 
 static uint8_t t_CURR_ROW;
+static uint8_t t_CURR_COL;
 
 void t_clear_rows(int lines){
+
 	size_t row = 0;
 	if(lines < 0){
 		row = NUM_ROWS + lines; //delete from bottom
 		lines = NUM_ROWS;
 	}
-	for(; row < lines; i++){
+
+	struct vbuf_t EMPTY_CHAR = (struct vbuf_t) {_char: ' ', color: t_THEME};
+	for(; row < lines; row++){
 		//if only we had memcpy
 		for(size_t col = 0; col < NUM_COLS; col++){
 			V_BUF[col + NUM_COLS * row] = EMPTY_CHAR;
 		}
-	}
-	if(lines > 0){	//only scroll up
-		t_scroll(t_UP, lines);
-		t_CURR_ROW -= lines;
 	}
 }
 
@@ -42,23 +40,34 @@ void t_print(char* str){
 		switch(str[i]){
 		case '\n':
 			if(t_CURR_ROW == NUM_ROWS-1){
-				t_clear_rows(1);
+			//	t_clear_rows(1);
+				t_scroll(t_UP, 1);
+				t_clear_rows(-1);
 			}else{
 				t_CURR_ROW++;
 			}
-			break;
-		case '\0': return;
+			t_CURR_COL = 0;
+			continue;
+		case '\0': 
+			return;
 		default:
 			struct vbuf_t cbuf = (struct vbuf_t) {_char: str[i], color: t_THEME};
-			V_BUF[col + NUM_COLS * t_CURR_ROW] = cbuf;
+			V_BUF[t_CURR_COL + NUM_COLS * t_CURR_ROW] = cbuf;
 		}
+		t_CURR_COL++;
 	}
 }
 
 void t_scroll(int direction, uint8_t num_lines){
-	for(int i = 1; i < num_lines; i++){
-		for(int j = 0; j < NUM_COLS; j++){
-			vbuf[j + NUM_COLS * (i-1)] = vbuf[j + NUM_COLS * i];
+	for(int k = 0; k < num_lines; k++){
+		for(int i = 1; i < NUM_ROWS; i++){
+			for(int j = 0; j < NUM_COLS; j++){
+				V_BUF[j + NUM_COLS * (i-1)] = V_BUF[j + NUM_COLS * i];
+			}
 		}
 	}
+}
+
+void t_set_theme(uint8_t fg, uint8_t bg){
+	t_THEME = fg | bg << 4;
 }
