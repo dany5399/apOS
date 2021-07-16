@@ -1,5 +1,4 @@
 SRC=src
-
 BUILD=build
 BIN=$(BUILD)/bin
 

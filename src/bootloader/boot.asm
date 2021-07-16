@@ -1,7 +1,7 @@
 global start
 
 extern set_long_mode
-extern k_main
+extern kmain
 
 bits 32
 
@@ -31,7 +31,7 @@ lm:								; enter long mode
 		mov gs, ax
 		mov ss, ax
 
-		call k_main				; call kernel
+		call kmain				; call kernel
 
 	;	mov dword [0xb8000], 0x2f4b2f4f			; put OK in video mem
 		hlt

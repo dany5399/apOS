@@ -1,7 +1,7 @@
-#include "terminal.h"
+#include "console.h"
 
-void k_main(){
-	t_clear_rows(NUM_ROWS);
+void kmain(){
+	c_clear_rows(NUM_ROWS);
 	int i = 48;
 	while(1){
 		char str[3];
@@ -13,7 +13,7 @@ void k_main(){
 		str[0] = (char) i;
 		str[1] = '\n';
 		str[2] = '\0';
-		t_print((char*)str);
+		c_print((char*)str);
 		i = (i == 58) ? 48:i+1;
 	}
 }
