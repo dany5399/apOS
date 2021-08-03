@@ -10,80 +10,97 @@ typedef struct _fmt_info{
 static inline void get_format_info(const char* fmt, fmt_info_t* fmt_info){
 	while(*fmt){
 		fmt_info->msg_len++;
-		if(*fmt == '%')
+		if(*fmt++ == '%')
 			fmt_info->fmt_count++;
 	}
 	fmt_info->msg_len += fmt_info->fmt_count*20; //for good measure in case it's large numbers or addresses
 }
 
 void kprintf(const char* format, ...){
-	
+
 	fmt_info_t fmt_info = {msg_len: 0, fmt_count: 0};
 	get_format_info(format, &fmt_info);
-
+	
 	int msg_pos = 0;
-	int fmt_num = 0;
-
 	char msg[fmt_info.msg_len];
-	char fmt_pos[fmt_info.fmt_count];
-	char fmt_msg[fmt_info.fmt_count][20];	//for now...
 
 	//TODO: fix/impl all specifiers
 	va_list args;
 	va_start(args, format);
 	while(*format){
 		if(*format++ == '%'){
-	
+			
 			int i = 0;
-			fmt_pos[fmt_num] = msg_pos;
 
 			switch(*format++){
+			
 			//for some reason these also do unsigned short
 			case 'd':
 			case 'i':
 				int num = va_arg(args, int);
-				while(num > 9){
-					int digit = num % 10;
-					fmt_msg[fmt_num][i++] = digit + '0';
+				int displaced = 0;
+
+				if(num < 0){
+					num *= -1;
+					msg[msg_pos++] = '-';
 				}
-				fmt_msg[fmt_num++][i] = '\0';
+				
+				int num_copy = num;
+				//just log10
+				while(num_copy > 0){
+					num_copy /= 10;
+					displaced++;
+				}	
+
+				while(num > 0){
+					msg[msg_pos + --displaced] = (num % 10) + '0';
+					num /= 10;
+					i++;
+				}
 				msg_pos += i;
 				continue;
-
+		
 			case 's':
-				char* str = va_arg(args, char*);
+				char* str = va_arg(args, char*);	
 				while(*str){
-					fmt_msg[fmt_num][i++] = *str;
-				}
-				fmt_msg[fmt_num++][i] = '\0';
-				msg_pos += i;
+					msg[msg_pos++] = *str++;
+				}	
 				continue;
-
+			
+			case 'p':
+				unsigned long lnum = (unsigned long) va_arg(args, void*);
+				goto LPTR;			
 			//just assuming unsigned for now
 			case 'x':
 			case 'X':
-				unsigned long lnum = va_arg(args, unsigned long);
-				while(lnum > 9){
-					uint32_t digit = lnum % 10;
-					fmt_msg[fmt_num][i++] = digit + '0';
+				lnum = va_arg(args, unsigned long);
+LPTR:
+				displaced = 0;
+
+				msg[msg_pos++] = '0';
+				msg[msg_pos++] = 'x';
+
+				unsigned long lnum_copy = lnum;
+				while(lnum_copy > 0){
+					lnum_copy /= 16;
+					displaced++;
 				}
-				fmt_msg[fmt_num++][i] = '\0';
+				while(lnum > 0){
+					unsigned char digit = (lnum % 16) + '0';
+					lnum /= 16;
+					msg[msg_pos + --displaced] = (digit > 57) ? digit + 7 : digit;
+					i++;
+				}	
 				msg_pos += i;
 				continue;
 			}
 		}
-		msg[msg_pos++] = *format;
-	}
-
-	for(int i = 0; i < fmt_info.fmt_count; i++){
-		int j = 0;
-		for(char c = fmt_msg[i][j]; c != '\0'; j++){
-			msg[fmt_pos[i] + j] = c;
-		}
+		msg[msg_pos++] = *(format-1);
 	}
 	va_end(args);
 
-	c_print((char*) msg);
+	msg[msg_pos] = '\0';
+	c_print(msg);
 }
 //for later. dont feel like properly copy pasting format specs and comments
 /*

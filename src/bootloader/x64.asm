@@ -14,11 +14,10 @@ section .txt
 set_long_mode:
 	.paging:
 		mov edi, PML4			; PML4
-		mov cr3, edi
 ;		xor eax, eax
 ;		mov ecx, 4096
 ;		rep stosd				; clear table
-;		mov edi, cr3
+		mov cr3, edi
 
 		mov eax, PDPT
 		or eax, PW

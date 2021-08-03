@@ -1,5 +1,8 @@
+%define MULTIBOOT2_BOOTLOADER_MAGIC 0x36d76289
+
 global start
 
+;extern mem_info_tag
 extern set_long_mode
 extern kmain
 
@@ -14,7 +17,7 @@ stack_top:
 section .text
 start:
 		cli
-		mov esp, 4096*4
+		mov esp, stack_top
 
 		call set_long_mode
 		lgdt [gdt64.ptr]		; load gdt64
@@ -30,9 +33,13 @@ lm:								; enter long mode
 		mov fs, ax
 		mov gs, ax
 		mov ss, ax
+		
+		;mov rax, MULTIBOOT2_BOOTLOADER_MAGIC
+		;mov rbx, mem_info_tag
+		;push rbx
+		;push rax
 
 		call kmain				; call kernel
-
-	;	mov dword [0xb8000], 0x2f4b2f4f			; put OK in video mem
+		
 		hlt
 

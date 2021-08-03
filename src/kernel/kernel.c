@@ -1,19 +1,19 @@
 #include "console.h"
+#include "kprintf.h"
+#include "multiboot.h"
 
-void kmain(){
-	c_clear_rows(NUM_ROWS);
-	int i = 48;
-	while(1){
-		char str[3];
-		//*
-		for(int j = 0; j < 100000000; j++){
-			str[0] = i;
-		}
-		//*/
-		str[0] = (char) i;
-		str[1] = '\n';
-		str[2] = '\0';
-		c_print((char*)str);
-		i = (i == 58) ? 48:i+1;
-	}
+void kmain(/*struct multiboot_tag_basic_meminfo* meminfo, uint32_t magic*/){
+	//*
+	unsigned long long sp, cr3;
+
+	asm("mov %%rsp, %0\n\t"
+		"mov %%cr3, %1\n\t"
+		: "=r" (sp), "=r" (cr3)
+		: 
+	);
+
+	kprintf("rsp: %x\n", sp);
+	kprintf("cr3: %x\n", cr3);
+	//*/
+	//kprintf("%d\n", meminfo->mem_lower);
 }
